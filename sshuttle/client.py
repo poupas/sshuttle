@@ -594,13 +594,13 @@ def main(listenip_v6, listenip_v4,
     # check if we need the full-blown firewall helper (which runs as root)
     # if no subnets or auto-* options are specified, the helper is not needed.
     # in this case, an external mechanism should set the required firewall rules
-    full_helper = any((
+    need_firewall = any((
         subnets_include,
         subnets_exclude,
         auto_nets,
         auto_hosts
     ))
-    fw = FirewallClient(method_name) if full_helper else \
+    fw = FirewallClient(method_name) if need_firewall else \
         StrippedFirewallClient(method_name)
 
     # Get family specific subnet lists
