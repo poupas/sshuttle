@@ -29,9 +29,9 @@ def main():
         else:
             includes = opt.subnets + opt.subnets_file
             excludes = opt.exclude
-            if not includes and not opt.auto_nets:
-                parser.error('at least one subnet, subnet file, '
-                             'or -N expected')
+            if not any((includes, opt.auto_nets, opt.no_subnets)):
+                parser.error('at least one subnet, subnet file, -N, '
+                             'or --no-subnets expected')
             remotename = opt.remote
             if remotename == '' or remotename == '-':
                 remotename = None

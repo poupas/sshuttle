@@ -309,3 +309,10 @@ parser.add_argument(
     (internal use only)
     """
 )
+parser.add_argument(
+    "--no-subnets",
+    action="store_true",
+    help="""
+    Do not add subnets (firewall rules not created)
+    """
+)

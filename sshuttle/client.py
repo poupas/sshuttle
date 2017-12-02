@@ -186,7 +186,7 @@ class MultiListener:
 
 class FirewallClient:
 
-    def __init__(self, method_name):
+    def __init__(self, method_name, need_root=True):
         self.auto_nets = []
         python_path = os.path.dirname(os.path.dirname(__file__))
         argvbase = ([sys.executable, sys.argv[0]] +
@@ -211,7 +211,7 @@ class FirewallClient:
             # run in the child process
             s2.close()
         e = None
-        if os.getuid() == 0:
+        if os.getuid() == 0 or not need_root:
             argv_tries = argv_tries[-1:]  # last entry only
         for argv in argv_tries:
             try:
@@ -560,7 +560,13 @@ def main(listenip_v6, listenip_v4,
             return 5
     debug1('Starting sshuttle proxy.\n')
 
-    fw = FirewallClient(method_name)
+    need_root = any((
+        subnets_include,
+        subnets_exclude,
+        auto_nets,
+        auto_hosts
+    ))
+    fw = FirewallClient(method_name, need_root)
 
     # Get family specific subnet lists
     if dns:
