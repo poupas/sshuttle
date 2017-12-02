@@ -14,7 +14,7 @@ import platform
 from sshuttle.ssnet import SockWrapper, Handler, Proxy, Mux, MuxWrapper
 from sshuttle.helpers import log, debug1, debug2, debug3, Fatal, islocal, \
     resolvconf_nameservers
-from sshuttle.methods import get_method, Features
+from sshuttle.methods import get_method, get_auto_method, Features
 try:
     from pwd import getpwnam
 except ImportError:
@@ -211,7 +211,7 @@ class FirewallClient:
             # run in the child process
             s2.close()
         e = None
-        if os.getuid() == 0 or not need_root:
+        if os.getuid() == 0:
             argv_tries = argv_tries[-1:]  # last entry only
         for argv in argv_tries:
             try:
@@ -308,6 +308,37 @@ class FirewallClient:
         rv = self.p.wait()
         if rv:
             raise Fatal('cleanup: %r returned %d' % (self.argv, rv))
+
+
+class StrippedFirewallClient:
+
+    def __init__(self, method_name, need_root=True):
+        self.auto_nets = []
+
+        if method_name == "auto":
+            method = get_auto_method()
+        else:
+            method = get_method(method_name)
+
+        self.method = method
+        self.method.set_firewall(self)
+
+    def setup(self, subnets_include, subnets_exclude, nslist,
+              redirectport_v6, redirectport_v4, dnsport_v6, dnsport_v4, udp,
+              user):
+        return
+
+    def check(self):
+        return
+
+    def start(self):
+        return
+
+    def sethostip(self, hostname, ip):
+        return
+
+    def done(self):
+        return
 
 
 dnsreqs = {}
@@ -560,13 +591,17 @@ def main(listenip_v6, listenip_v4,
             return 5
     debug1('Starting sshuttle proxy.\n')
 
-    need_root = any((
+    # check if we need the full-blown firewall helper (which runs as root)
+    # if no subnets or auto-* options are specified, the helper is not needed.
+    # in this case, an external mechanism should set the required firewall rules
+    full_helper = any((
         subnets_include,
         subnets_exclude,
         auto_nets,
         auto_hosts
     ))
-    fw = FirewallClient(method_name, need_root)
+    fw = FirewallClient(method_name) if full_helper else \
+        StrippedFirewallClient(method_name)
 
     # Get family specific subnet lists
     if dns:
