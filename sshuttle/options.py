@@ -310,3 +310,10 @@ parser.add_argument(
     (internal use only)
     """
 )
+parser.add_argument(
+    "--no-firewall",
+    action="store_true",
+    help="""
+    Do not create firewall rules (overrides subnet and host options)
+    """
+)
