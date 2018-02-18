@@ -160,13 +160,11 @@ class MultiListener:
         self.bind_called = True
         if address_v6 is not None:
             self.v6 = socket.socket(socket.AF_INET6, self.type, self.proto)
-            self.v6.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.v6.bind(address_v6)
         else:
             self.v6 = None
         if address_v4 is not None:
             self.v4 = socket.socket(socket.AF_INET, self.type, self.proto)
-            self.v4.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.v4.bind(address_v4)
         else:
             self.v4 = None
@@ -195,8 +193,8 @@ class FirewallClient:
         if ssyslog._p:
             argvbase += ['--syslog']
         argv_tries = [
-            ['sudo', '-p', '[local sudo] Password: ',
-                ('PYTHONPATH=%s' % python_path), '--'] + argvbase,
+            ['sudo', '-p', '[local sudo] Password: ', '/usr/bin/env',
+                ('PYTHONPATH=%s' % python_path)] + argvbase,
             argvbase
         ]
 
