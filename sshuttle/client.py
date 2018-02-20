@@ -572,7 +572,7 @@ def _main(tcp_listener, udp_listener, fw, ssh_cmd, remotename,
 
 
 def main(listenip_v6, listenip_v4,
-         ssh_cmd, remotename, python, latency_control, dns, nslist,
+         ssh_cmd, remotename, python, latency_control, dns_port, nslist,
          method_name, seed_hosts, auto_hosts, auto_nets,
          subnets_include, subnets_exclude, daemon, to_nameserver, pidfile,
          user):
@@ -598,7 +598,7 @@ def main(listenip_v6, listenip_v4,
         StrippedFirewallClient(method_name)
 
     # Get family specific subnet lists
-    if dns:
+    if dns_port >= 0:
         nslist += resolvconf_nameservers()
         if to_nameserver is not None:
             to_nameserver = "%s@%s" % tuple(to_nameserver[1:])
@@ -736,7 +736,7 @@ def main(listenip_v6, listenip_v4,
     if required.dns:
         # search for spare port for DNS
         debug2('Binding DNS:')
-        ports = range(12300, 9000, -1)
+        ports = [dns_port] if dns_port > 0 else range(12300, 9000, -1)
         for port in ports:
             debug2(' %d' % port)
             if port in used_ports: continue

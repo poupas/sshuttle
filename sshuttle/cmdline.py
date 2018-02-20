@@ -66,12 +66,13 @@ def main():
             if opt.syslog:
                 ssyslog.start_syslog()
                 ssyslog.stderr_to_syslog()
+            dns_port = opt.dns_port if opt.dns else -1
             return_code = client.main(ipport_v6, ipport_v4,
                                       opt.ssh_cmd,
                                       remotename,
                                       opt.python,
                                       opt.latency_control,
-                                      opt.dns,
+                                      dns_port,
                                       nslist,
                                       opt.method,
                                       sh,

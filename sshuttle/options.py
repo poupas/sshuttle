@@ -134,9 +134,16 @@ parser.add_argument(
 )
 parser.add_argument(
     "--dns",
-    action="store_true",
     help="""
     capture local DNS requests and forward to the remote DNS server
+    """
+)
+parser.add_argument(
+    "--dns-port",
+    metavar="PORT",
+    default=0,
+    help="""
+    port to listen for DNS requests
     """
 )
 parser.add_argument(
