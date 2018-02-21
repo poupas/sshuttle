@@ -142,6 +142,7 @@ parser.add_argument(
 parser.add_argument(
     "--dns-port",
     metavar="PORT",
+    type=int,
     default=0,
     help="""
     port to listen for DNS requests
