@@ -134,6 +134,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--dns",
+    action="store_true",
     help="""
     capture local DNS requests and forward to the remote DNS server
     """
