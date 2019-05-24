@@ -1,6 +1,7 @@
 import re
 import socket
 from argparse import ArgumentParser, Action, ArgumentTypeError as Fatal
+
 from sshuttle import __version__
 
 
@@ -31,7 +32,7 @@ def parse_subnetport(s):
     if s.count(':') > 1:
         rx = r'(?:\[?([\w\:]+)(?:/(\d+))?]?)(?::(\d+)(?:-(\d+))?)?$'
     else:
-        rx = r'([\w\.]+)(?:/(\d+))?(?::(\d+)(?:-(\d+))?)?$'
+        rx = r'([\w\.\-]+)(?:/(\d+))?(?::(\d+)(?:-(\d+))?)?$'
 
     m = re.match(rx, s)
     if not m:
@@ -62,7 +63,7 @@ def parse_ipport(s):
     elif ']' in s:
         rx = r'(?:\[([^]]+)])(?::(\d+))?$'
     else:
-        rx = r'([\w\.]+)(?::(\d+))?$'
+        rx = r'([\w\.\-]+)(?::(\d+))?$'
 
     m = re.match(rx, s)
     if not m:
@@ -169,7 +170,7 @@ parser.add_argument(
 
 parser.add_argument(
     "--method",
-    choices=["auto", "nat", "tproxy", "pf", "ipfw"],
+    choices=["auto", "nat", "nft", "tproxy", "pf", "ipfw"],
     metavar="TYPE",
     default="auto",
     help="""
@@ -239,7 +240,7 @@ parser.add_argument(
     metavar="HOSTNAME[,HOSTNAME]",
     default=[],
     help="""
-    comma-separated list of hostnames for initial scan (may be used with 
+    comma-separated list of hostnames for initial scan (may be used with
     or without --auto-hosts)
     """
 )
@@ -324,5 +325,13 @@ parser.add_argument(
     action="store_true",
     help="""
     Do not create firewall rules (overrides subnet and host options)
+    """
+)
+parser.add_argument(
+    "--no-sudo-pythonpath",
+    action="store_false",
+    dest="sudo_pythonpath",
+    help="""
+    do not set PYTHONPATH when invoking sudo
     """
 )

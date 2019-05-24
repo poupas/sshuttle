@@ -1,6 +1,8 @@
+import re
 import os
 import socket
 import subprocess as ssubprocess
+
 from sshuttle.helpers import log, debug1, Fatal, family_to_string
 
 
@@ -23,13 +25,13 @@ def ipt_chain_exists(family, table, name):
         'PATH': os.environ['PATH'],
         'LC_ALL': "C",
     }
-    p = ssubprocess.Popen(argv, stdout=ssubprocess.PIPE, env=env)
-    for line in p.stdout:
-        if line.startswith(b'Chain %s ' % name.encode("ASCII")):
-            return True
-    rv = p.wait()
-    if rv:
-        raise Fatal('%r returned %d' % (argv, rv))
+    try:
+        output = ssubprocess.check_output(argv, env=env)
+        for line in output.decode('ASCII').split('\n'):
+            if line.startswith('Chain %s ' % name):
+                return True
+    except ssubprocess.CalledProcessError as e:
+        raise Fatal('%r returned %d' % (argv, e.returncode))
 
 
 def ipt(family, table, *args):
@@ -47,6 +49,39 @@ def ipt(family, table, *args):
     rv = ssubprocess.call(argv, env=env)
     if rv:
         raise Fatal('%r returned %d' % (argv, rv))
+
+
+def nft(family, table, action, *args):
+    if family == socket.AF_INET:
+        argv = ['nft', action, 'ip', table] + list(args)
+    elif family == socket.AF_INET6:
+        argv = ['nft', action, 'ip6', table] + list(args)
+    else:
+        raise Exception('Unsupported family "%s"' % family_to_string(family))
+    debug1('>> %s\n' % ' '.join(argv))
+    env = {
+        'PATH': os.environ['PATH'],
+        'LC_ALL': "C",
+    }
+    rv = ssubprocess.call(argv, env=env)
+    if rv:
+        raise Fatal('%r returned %d' % (argv, rv))
+
+
+def nft_get_handle(expression, chain):
+    cmd = 'nft'
+    argv = [cmd, 'list', expression, '-a']
+    env = {
+        'PATH': os.environ['PATH'],
+        'LC_ALL': "C",
+    }
+    try:
+        output = ssubprocess.check_output(argv, env=env)
+        for line in output.decode('utf-8').split('\n'):
+            if ('jump %s' % chain) in line:
+                return re.sub('.*# ', '', line)
+    except ssubprocess.CalledProcessError as e:
+        raise Fatal('%r returned %d' % (argv, e.returncode))
 
 
 _no_ttl_module = False
