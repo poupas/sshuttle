@@ -35,7 +35,15 @@ Obtaining sshuttle
       
 - Arch Linux::
 
-      pacman --sync sshuttle
+      pacman -S sshuttle
+
+- Fedora::
+
+      dnf install sshuttle
+
+- NixOS::
+
+      nix-env -iA nixos.sshuttle
 
 - From PyPI::
 
@@ -46,6 +54,13 @@ Obtaining sshuttle
       git clone https://github.com/sshuttle/sshuttle.git
       cd sshuttle
       sudo ./setup.py install
+
+- FreeBSD::
+
+      # ports
+      cd /usr/ports/net/py-sshuttle && make install clean
+      # pkg
+      pkg install py36-sshuttle
 
 It is also possible to install into a virtualenv as a non-root user.
 
@@ -66,6 +81,10 @@ It is also possible to install into a virtualenv as a non-root user.
 - Homebrew::
 
       brew install sshuttle
+
+- Nix::
+
+      nix-env -iA nixpkgs.sshuttle
 
 
 Documentation
