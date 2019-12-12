@@ -128,6 +128,18 @@ def connect(ssh_cmd, rhostport, python, stderr, options):
     def setup():
         # runs in the child process
         s2.close()
+        def stop_process_if_parent_stops():
+            import platform
+            if platform.system().lower() != 'linux':
+                return
+            import ctypes
+            import signal
+            PR_SET_PDEATHSIG = 1
+            libc = ctypes.CDLL("libc.so.6")
+            libc.prctl(PR_SET_PDEATHSIG, signal.SIGTERM)
+
+        stop_process_if_parent_stops()
+
     s1a, s1b = os.dup(s1.fileno()), os.dup(s1.fileno())
     s1.close()
     debug2('executing: %r\n' % argv)
